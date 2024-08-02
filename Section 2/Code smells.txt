@@ -1,0 +1,24 @@
+1. Using if-else construct instead of switch
+2. Duplicating the next code snippet:
+string sIntervalType = "s";
+if (rbVolume.Checked)
+{
+    sIntervalType = "v";
+}
+else if (rbTick.Checked)
+{
+    sIntervalType = "t";
+}
+
+3. Using Hungarian notation
+C# is a strongly typed language, so camelCase is more suitable
+
+4. Using String.Format with multiple parameters instead of composition parameters into 1 class
+
+5. Using String.Format instead of $-construction, what could make templates more descriptive
+
+6. Checking for an error by StartsWith instead of making class with this check
+
+7. Using literals instead of string constants
+
+8. Very long method
