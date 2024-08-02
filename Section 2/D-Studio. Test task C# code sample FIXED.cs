@@ -1,9 +1,10 @@
 ﻿private void btnGetData_Click(object sender, EventArgs e)
 {
-    // clear previous request data
-    lstData.Items.Clear();
 
-    var parameters = new UIParameters(
+	// send it to the feed via the socket // clear previous request data
+	lstData.Items.Clear();
+
+	var parameters = new UIParameters(
 			cboHistoryType.Text,
 			txtSymbol.Text,
 			txtDatapoints.Text,
@@ -23,21 +24,21 @@
 		);
 
 	var request = new RequestFabric(parameters).Create();
-	
 
-    // verify we have formed a request string
-    if (request.IsError)
-    {
+
+	// verify we have formed a request string
+	if (request.IsError)
+	{
 		UpdateListview(request, parameters);
 	}
-    else
+	else
 	{
 		// send it to the feed via the socket
 		SendRequestToIQFeed(request);
-    }
+	}
 
-    // tell the socket we are ready to receive data
-    WaitForData("History");
+	// tell the socket we are ready to receive data
+	WaitForData("History");
 }
 
 private void UpdateListview(Request request, UIParameters parameters)
@@ -47,82 +48,82 @@ private void UpdateListview(Request request, UIParameters parameters)
 }
 
 public record UIParameters(
-    string HistoryType, 
-    string Symbol, 
-    string Datapoints, 
-    string Direction,
-    string RequestID,
-    string DatapointsPerSend,
-    string Days,
-    string BeginFilterTime,
-    string EndFilterTime,
-    string BeginDateTime,
-    string EndDateTime,
-    string Interval,
-    bool BoxTimeStampChecked,
-    bool AppendTickChecked,
+	string HistoryType,
+	string Symbol,
+	string Datapoints,
+	string Direction,
+	string RequestID,
+	string DatapointsPerSend,
+	string Days,
+	string BeginFilterTime,
+	string EndFilterTime,
+	string BeginDateTime,
+	string EndDateTime,
+	string Interval,
+	bool BoxTimeStampChecked,
+	bool AppendTickChecked,
 	bool VolumeChecked,
-    bool TickChecked);
+	bool TickChecked);
 
 public abstract class Request
 {
-    protected abstract string Template { get; init; }
-    protected readonly UIParameters _parameters;
+	protected abstract string Template { get; init; }
+	protected readonly UIParameters _parameters;
 
 	public abstract string Request { get; }
 
-    public abstract bool IsError { get; }
+	public abstract bool IsError { get; }
 
-    protected Request()
-    {
+	protected Request()
+	{
 
-    }
+	}
 
 	protected Request(UIParameters parameters)
-    {
-        _parameters = parameters;
-    }
+	{
+		_parameters = parameters;
+	}
 
-    protected string IntervalType => VolumeChecked ? "v" : TickChecked ? "t" : "s";
+	protected string IntervalType => VolumeChecked ? "v" : TickChecked ? "t" : "s";
 }
 
 public class TickDatapointsRequest : Request
 {
 	public TickDatapointsRequest(UIParameters parameters) : base(parameters)
-    {
+	{
 		Template = "HTX,{0},{1},{2},{3},{4}\r\n";
 	}
 
-    public bool IsError => false;
+	public bool IsError => false;
 
-	public string Request => 
-        String.Format(Template, 
-            _parameters.Symbol, 
-            _parameters.Datapoints, 
-            _parameters.Direction,
-            _parameters.RequestID,
-            _parameters.DatapointsPerSend);
+	public string Request =>
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Datapoints,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend);
 }
 
 public class TickDaysRequest : Request
 {
 	public TickDaysRequest(UIParameters parameters) : base(parameters)
 	{
-        Template = "HTD,{0},{1},{2},{3},{4},{5},{6},{7}\r\n";
+		Template = "HTD,{0},{1},{2},{3},{4},{5},{6},{7}\r\n";
 	}
 
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-			_parameters.Days,
-			_parameters.Datapoints,
-			_parameters.BeginFilterTime,
-			_parameters.EndFilterTime, 
-            _parameters.Direction,
-            _parameters.RequestID,
-            _parameters.DatapointsPerSend);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Days,
+				_parameters.Datapoints,
+				_parameters.BeginFilterTime,
+				_parameters.EndFilterTime,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend);
 }
 
 public class TickTimeframeRequset : Request
@@ -135,37 +136,37 @@ public class TickTimeframeRequset : Request
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-			_parameters.BeginDateTime,
-			_parameters.EndDateTime,
-			_parameters.Datapoints,
-			_parameters.BeginFilterTime,
-			_parameters.EndFilterTime,
-			_parameters.Direction,
-			_parameters.RequestID,
-			_parameters.DatapointsPerSend);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.BeginDateTime,
+				_parameters.EndDateTime,
+				_parameters.Datapoints,
+				_parameters.BeginFilterTime,
+				_parameters.EndFilterTime,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend);
 }
 
 public class IntervalDatapointsRequset : Request
 {
-    public IntervalDatapointsRequset(UIParameters parameters) : base(parameters)
-    {
-        Template = "HIX,{0},{1},{2},{3},{4},{5},{6},{7}\r\n";
-    }
+	public IntervalDatapointsRequset(UIParameters parameters) : base(parameters)
+	{
+		Template = "HIX,{0},{1},{2},{3},{4},{5},{6},{7}\r\n";
+	}
 
-    public bool IsError => false;
+	public bool IsError => false;
 
-    public string Request =>
-        String.Format(Template,
-            _parameters.Symbol,
-            _parameters.Interval,
-            _parameters.Datapoints,
-            _parameters.Direction,
-            _parameters.RequestID,
-            _parameters.DatapointsPerSend,
-            IntervalType,
-            _parameters.BoxTimeStampChecked ? 1 : 0);
+	public string Request =>
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Interval,
+				_parameters.Datapoints,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend,
+				IntervalType,
+				_parameters.BoxTimeStampChecked ? 1 : 0);
 }
 
 public class IntervalDaysRequset : Request
@@ -178,18 +179,18 @@ public class IntervalDaysRequset : Request
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-			_parameters.Interval,
-			_parameters.Days,
-            _parameters.Datapoints,
-			_parameters.BeginFilterTime,
-            _parameters.EndFilterTime,
-			_parameters.Direction,
-			_parameters.RequestID,
-			_parameters.DatapointsPerSend,
-			IntervalType,
-			_parameters.BoxTimeStampChecked ? 1 : 0);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Interval,
+				_parameters.Days,
+				_parameters.Datapoints,
+				_parameters.BeginFilterTime,
+				_parameters.EndFilterTime,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend,
+				IntervalType,
+				_parameters.BoxTimeStampChecked ? 1 : 0);
 }
 
 public class IntervalTimeframeRequest : Request
@@ -202,19 +203,19 @@ public class IntervalTimeframeRequest : Request
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-			_parameters.Interval,
-			_parameters.BeginDateTime,
-            _parameters.EndDateTime,
-			_parameters.Datapoints,
-			_parameters.BeginFilterTime,
-			_parameters.EndFilterTime,
-			_parameters.Direction,
-			_parameters.RequestID,
-			_parameters.DatapointsPerSend,
-			IntervalType,
-			_parameters.BoxTimeStampChecked ? 1 : 0);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Interval,
+				_parameters.BeginDateTime,
+				_parameters.EndDateTime,
+				_parameters.Datapoints,
+				_parameters.BeginFilterTime,
+				_parameters.EndFilterTime,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend,
+				IntervalType,
+				_parameters.BoxTimeStampChecked ? 1 : 0);
 }
 
 public abstract class DatapointsRequest : Request
@@ -227,19 +228,19 @@ public abstract class DatapointsRequest : Request
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-			_parameters.Datapoints,
-			_parameters.Direction,
-			_parameters.RequestID,
-			_parameters.DatapointsPerSend,
-			_parameters.AppendTickChecked ? 1 : 0);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.Datapoints,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend,
+				_parameters.AppendTickChecked ? 1 : 0);
 }
 
 public abstract class DailyDatapointsRequest : DatapointsRequest
 {
-    public DailyDatapointsRequest(UIParameters parameters) : base(parameters)
-    {
+	public DailyDatapointsRequest(UIParameters parameters) : base(parameters)
+	{
 		Template = "HDX,{0},{1},{2},{3},{4},{5}\r\n";
 	}
 }
@@ -270,47 +271,47 @@ public class DailyTimeframeRequest: Request
 	public bool IsError => false;
 
 	public string Request =>
-		String.Format(Template,
-			_parameters.Symbol,
-            _parameters.BeginDateTime,
-            _parameters.EndDateTime,
-			_parameters.Datapoints,
-			_parameters.Direction,
-			_parameters.RequestID,
-			_parameters.DatapointsPerSend,
-			_parameters.AppendTickChecked ? 1 : 0);
+			String.Format(Template,
+				_parameters.Symbol,
+				_parameters.BeginDateTime,
+				_parameters.EndDateTime,
+				_parameters.Datapoints,
+				_parameters.Direction,
+				_parameters.RequestID,
+				_parameters.DatapointsPerSend,
+				_parameters.AppendTickChecked ? 1 : 0);
 }
 
 public class ErrorRequest : Request
 {
-    public bool IsError => true;
-    public string Request => "Error Processing Request.";
+	public bool IsError => true;
+	public string Request => "Error Processing Request.";
 }
 
 public class RequestFabric
 {
-    private readonly UIParameters _parameters;
-    public RequestFabric(UIParameters parameters)
-    {
-        _parameters = parameters;
-    }
+	private readonly UIParameters _parameters;
+	public RequestFabric(UIParameters parameters)
+	{
+		_parameters = parameters;
+	}
 
-    public Request Create()
-    {
-        return _parameters.HistoryType switch
-        {
-            "Tick Datapoints" => new TickDatapointsRequest(_parameters),
-            "Tick Days" => new TickDaysRequest(_parameters),
-            "Tick Timeframe" => new TickTimeframeRequset(_parameters),
-            "Interval Datapoints" => new IntervalDatapointsRequset(_parameters),
-            "Interval Days" => new IntervalDaysRequset(_parameters),
-            "Interval Timeframe" => new IntervalTimeframeRequest(_parameters),
-            "Daily Datapoints" => new DailyDatapointsRequest(_parameters),
-            "Daily Days" => new DailyTimeframeRequest(_parameters),
-            "Weekly Datapoints" => new WeeklyDatapointsRequest(_parameters),
-            "Monthly Datapoints" => new MonthlyDatapointsRequest(_parameters),
-            _ => new ErrorRequest()
-        };
+	public Request Create()
+	{
+		return _parameters.HistoryType switch
+		{
+			"Tick Datapoints" => new TickDatapointsRequest(_parameters),
+			"Tick Days" => new TickDaysRequest(_parameters),
+			"Tick Timeframe" => new TickTimeframeRequset(_parameters),
+			"Interval Datapoints" => new IntervalDatapointsRequset(_parameters),
+			"Interval Days" => new IntervalDaysRequset(_parameters),
+			"Interval Timeframe" => new IntervalTimeframeRequest(_parameters),
+			"Daily Datapoints" => new DailyDatapointsRequest(_parameters),
+			"Daily Days" => new DailyTimeframeRequest(_parameters),
+			"Weekly Datapoints" => new WeeklyDatapointsRequest(_parameters),
+			"Monthly Datapoints" => new MonthlyDatapointsRequest(_parameters),
+			_ => new ErrorRequest()
+		};
 	}
 }
 
